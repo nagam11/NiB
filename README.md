@@ -1,4 +1,4 @@
-# NiB
+# Nature in a Box (NiB): enabling people with hearing loss to sense nature through machine learning 
 
 ## Abstract
 
