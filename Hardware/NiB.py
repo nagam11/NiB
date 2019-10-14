@@ -1,33 +1,29 @@
 import board
 import neopixel
-# Neopixels connected to GPIO 18
-pixel_pin = board.D18
-num_pixels = 2
+import time
+from digitalio import DigitalInOut, Direction
 
-# The order of the pixel colors - RGB or GRB. Some NeoPixels have red and green reversed!
-# For RGBW NeoPixels, simply change the ORDER to RGBW or GRBW.
-ORDER = neopixel.RGBW
-pixels = neopixel.NeoPixel(pixel_pin, num_pixels, brightness=0.7, auto_write=False,
-                           pixel_order=ORDER)
+# Setup pins
+pad_pin = board.D23
+pad = DigitalInOut(pad_pin)
+pixels = neopixel.NeoPixel(board.D18,30)
+pad.direction = Direction.INPUT
+# Status of device
+device_on = False
+# Turn off Neopixels on restart
+pixels.fill((0,0,0))
+pixels.show()
 
 while True:
-    # Comment this line out if you have RGBW/GRBW NeoPixels
-    #pixels.fill((255, 0, 0))
-    # Uncomment this line if you have RGBW/GRBW NeoPixels
-    pixels.fill((255, 0, 0, 0))
-    pixels.show()
-    time.sleep(1)
-
-    # Comment this line out if you have RGBW/GRBW NeoPixels
-    #pixels.fill((0, 255, 0))
-    # Uncomment this line if you have RGBW/GRBW NeoPixels
-    pixels.fill((0, 255, 0, 0))
-    pixels.show()
-    time.sleep(1)
-
-    # Comment this line out if you have RGBW/GRBW NeoPixels
-    #pixels.fill((0, 0, 255))
-    # Uncomment this line if you have RGBW/GRBW NeoPixels
-    pixels.fill((0, 0, 255, 0))
-    pixels.show()
-    time.sleep(1)
+        if pad.value and not device_on:
+                print("Turn on")
+                device_on = pad.value
+                pixels.fill((255,0,0))
+                pixels.show()
+                time.sleep(1)
+        elif pad.value and device_on:
+                print("Turn off")
+                device_on = False
+                pixels.fill((0,0,0))
+                pixels.show()
+                time.sleep(1)
