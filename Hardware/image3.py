@@ -1,17 +1,25 @@
 from tkinter import *
+from PIL import ImageTk, Image
 
 class MainWindow():
     def __init__(self, main):
 
         # canvas for image
-        self.canvas = Canvas(main, width=500, height=500)
+        self.canvas = Canvas(main, width=1850, height=890, bg = 'black')
         self.canvas.grid(row=0, column=0)
 
         # images
         self.my_images = []
-        self.my_images.append(PhotoImage(file = "owl.png"))
-        self.my_images.append(PhotoImage(file = "con.png"))
-        self.my_images.append(PhotoImage(file = "touch.png"))
+        original = Image.open("owl.jpg")
+        img = ImageTk.PhotoImage(original)
+        self.my_images.append(img)
+        original_1 = Image.open("con.jpg")
+        img_1 = ImageTk.PhotoImage(original_1)
+        self.my_images.append(img_1)
+        original_2 = Image.open("touch.jpg")
+        original_2 = original_2.resize((1450,890))
+        img_2 = ImageTk.PhotoImage(original_2)
+        self.my_images.append(img_2)
         self.my_image_number = 0
 
         # set first image on canvas
