@@ -8,9 +8,13 @@ class Autoencoder(object):
         # Weights and biases
         hidden_layer_weights = tf.Variable(tf.random_normal([inout_dim, encoded_dim*100]))
         hidden_layer_biases = tf.Variable(tf.random_normal([encoded_dim*100]))
-        hidden2_layer_weights = tf.Variable(tf.random_normal([encoded_dim*100, encoded_dim]))
-        hidden2_layer_biases = tf.Variable(tf.random_normal([encoded_dim]))
-        output2_layer_weights = tf.Variable(tf.random_normal([encoded_dim, encoded_dim*100]))
+        hidden2_layer_weights = tf.Variable(tf.random_normal([encoded_dim*100, encoded_dim*10]))
+        hidden2_layer_biases = tf.Variable(tf.random_normal([encoded_dim*10]))
+        hidden3_layer_weights = tf.Variable(tf.random_normal([encoded_dim * 10, encoded_dim]))
+        hidden3_layer_biases = tf.Variable(tf.random_normal([encoded_dim]))
+        output3_layer_weights = tf.Variable(tf.random_normal([encoded_dim, encoded_dim * 10]))
+        output3_layer_biases = tf.Variable(tf.random_normal([encoded_dim * 10]))
+        output2_layer_weights = tf.Variable(tf.random_normal([encoded_dim*10, encoded_dim*100]))
         output2_layer_biases = tf.Variable(tf.random_normal([encoded_dim*100]))
         output_layer_weights = tf.Variable(tf.random_normal([encoded_dim*100, inout_dim]))
         output_layer_biases = tf.Variable(tf.random_normal([inout_dim]))
@@ -19,12 +23,14 @@ class Autoencoder(object):
         self._input_layer = tf.placeholder('float', [None, inout_dim])
         self._hidden_layer = tf.nn.sigmoid(tf.add(tf.matmul(self._input_layer, hidden_layer_weights), hidden_layer_biases))
         self._hidden2_layer = tf.nn.sigmoid(tf.add(tf.matmul(self._hidden_layer, hidden2_layer_weights), hidden2_layer_biases))
-        self._output2_layer = tf.matmul(self._hidden2_layer, output2_layer_weights) + output2_layer_biases
-        self._output_layer = tf.matmul(self._hidden_layer, output_layer_weights) + output_layer_biases
+        self._hidden3_layer = tf.nn.sigmoid(tf.add(tf.matmul(self._hidden2_layer, hidden3_layer_weights), hidden3_layer_biases))
+        self._output3_layer = tf.nn.sigmoid(tf.add(tf.matmul(self._hidden3_layer, output3_layer_weights), output3_layer_biases))
+        self._output2_layer = tf.nn.sigmoid(tf.add(tf.matmul(self._output3_layer, output2_layer_weights), output2_layer_biases))
+        self._output_layer = tf.add(tf.matmul(self._hidden_layer, output_layer_weights), output_layer_biases)
         self._real_output = tf.placeholder('float', [None, inout_dim])
 
         self._meansq = tf.reduce_mean(tf.square(self._output_layer - self._real_output))
-        self._optimizer = tf.train.AdagradOptimizer(learning_rate).minimize(self._meansq)
+        self._optimizer = tf.train.AdamOptimizer(learning_rate).minimize(self._meansq)
         self._training = tf.global_variables_initializer()
         self._session = tf.Session()
 
@@ -38,7 +44,8 @@ class Autoencoder(object):
                 _, c = self._session.run([self._optimizer, self._meansq],
                                          feed_dict={self._input_layer: epoch_input, self._real_output: epoch_input})
                 epoch_loss += c
-                print('Epoch', epoch, '/', epochs, 'loss:', epoch_loss)
+                print('Epoch', epoch, '/', epochs, 'Batch loss:', c)
+            print('Epoch', epoch, '/', epochs, 'Epoch loss:', epoch_loss)
 
     def getEncodedImage(self, image):
         encoded_image = self._session.run(self._hidden_layer, feed_dict={self._input_layer: [image]})
