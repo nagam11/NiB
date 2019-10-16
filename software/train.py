@@ -11,25 +11,26 @@ from scipy.io.wavfile import read
 path = "/Users/wagram/NiB/software/wav"
 audios = [os.path.abspath(file) for file in glob.glob(f"{path}/*.wav")]
 
+SAMPLE_RATE = 16000
 DURATION = 8000
 WINDOW = scipy.signal.hamming
 WINDOW_SIZE = 0.02
 WINDOW_STRIDE = 0.01
 
 
-def transform_audio(sound: np.ndarray, window_size, window_stride, window):
-    complex_spectrogram = librosa.stft(sound,
-                                       n_fft=window_size,
-                                       hop_length=window_stride,
-                                       win_length=window_size,
-                                       window=window)
-    spectrogram, phase = librosa.magphase(complex_spectrogram)
-    spectrogram = np.log1p(spectrogram)
+def transform_audio(sound: np.ndarray, sample_rate, window_size, window_stride, window):
+    n_fft = int(sample_rate * window_size)
+    win_length = n_fft
+    hop_length = int(sample_rate * window_stride)
+    D = librosa.stft(sound, n_fft=n_fft, hop_length=hop_length,
+                     win_length=win_length, window=window)
+    spectrogram, phase = librosa.magphase(D)
 
+    spectrogram = np.log1p(spectrogram)
     mean = spectrogram.mean()
     std = spectrogram.std()
-    spectrogram.add_(mean)
-    spectrogram.div_(std)
+    spectrogram = spectrogram - mean
+    spectrogram = spectrogram / std
 
     return spectrogram
 
@@ -40,7 +41,7 @@ for audio in audios:
     a = read(audio)
     a = np.array(a[1], dtype=float)
     if a.shape[0] == DURATION:
-        datapoints.append(transform_audio(a, WINDOW_SIZE, WINDOW_STRIDE, WINDOW))
+        datapoints.append(transform_audio(a, SAMPLE_RATE, WINDOW_SIZE, WINDOW_STRIDE, WINDOW))
 
 x_train, x_test = datapoints[:-200], datapoints[-200:]
 x_train = np.array(x_train)
