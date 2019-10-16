@@ -1,2 +1,6 @@
 .idea
+software/mp3
+software/output
+software/audio-autoencoder-master
+software/TFMusicAudioEncoder-master
 venv
