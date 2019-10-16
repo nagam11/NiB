@@ -1,5 +1,6 @@
 .idea
 software/mp3
+software/wav
 software/output
 software/audio-autoencoder-master
 software/TFMusicAudioEncoder-master
