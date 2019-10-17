@@ -5,6 +5,9 @@ from digitalio import DigitalInOut, Direction
 from gpiozero import PWMOutputDevice
 from tkinter import *
 from PIL import ImageTk, Image
+import os, random
+import logging
+import threading
 
 # Setup pins
 pad_pin = board.D20
@@ -30,6 +33,9 @@ motors = [r_1, r_2, r_3, r_4, r_5, l_1, l_2, l_3, l_4, l_5]
 pixels.fill((0,0,0))
 pixels.show()
 
+def play_on_speaker(file):
+    os.system("aplay /home/pi/Desktop/NiB/NiB/full_wav/"+ file)
+
 while True:
         # 1. Load model
         # TODO: load model when script started
@@ -54,34 +60,33 @@ while True:
                 device_on = True
                 # Show red light for Neopixels to indicate recording
                 pixels.fill((255,0,0))
-                pixels.show()
-                # Start sound demo
-                # 
+                pixels.show()              
+                
+                # show black entry screen
                 root = Tk()                
                 # canvas for image
                 canvas = Canvas(root, width=1850, height=890, bg = 'black')
                 canvas.grid(row=0, column=0)
-                
-                # images
-                my_images = []
-                original = Image.open("owl.jpg")
-                img = ImageTk.PhotoImage(original)
-                my_images.append(img)
-                original_1 = Image.open("con.jpg")
-                img_1 = ImageTk.PhotoImage(original_1)
-                my_images.append(img_1)
-                original_2 = Image.open("touch.jpg")
-                original_2 = original_2.resize((1450,890))
-                img_2 = ImageTk.PhotoImage(original_2)
-                my_images.append(img_2)
-                my_image_number = 0
-
-                # set first image on canvas
-                #image_on_canvas = canvas.create_image(0, 0, anchor = NW, image = my_images[my_image_number])
-                image_on_canvas = canvas.create_image(0, 0, anchor = NW, image = img_1)
-                
-                root.update_idletasks()
-                root.update()
+                black_screen = Image.open("black.jpg")
+                img = ImageTk.PhotoImage(black_screen)              
+                image_on_canvas = canvas.create_image(0, 0, anchor = NW, image = img)                
+                # Start sound demo
+                # 1. Randomly select one file from /software/full_wav
+                bird_full_wav = random.choice(os.listdir("/home/pi/Desktop/NiB/NiB/full_wav"))
+                print('Selected bird:',bird_full_wav)
+                filename_w_ext = os.path.basename("/home/pi/Desktop/NiB/NiB/full_wav/"+bird_full_wav)
+                filename, file_extension = os.path.splitext(filename_w_ext)                
+                # 2. Play it to speakers using a separate thread
+                speaker_thread = threading.Thread(target = play_on_speaker, args = (bird_full_wav,))
+                speaker_thread.start()
+                # 3. Projector shows bird based on pathname at ../../software/images
+                bird_image = Image.open("/home/pi/Desktop/NiB/NiB/Images"+filename+".jpg")
+                img = ImageTK.PhotoImage(bird_image)
+                image_on_canvas = 
+                # 4. Get all sub-files from this file ../../software/wav/path+'_'*.wav
+                # 5. Feed these files every 0.5 sec with timer to predictor
+                #root.update_idletasks()
+                #root.update()
                  # Sleep to avoid conflicts
                 time.sleep(1)                
         elif pad.value and device_on:
