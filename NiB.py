@@ -10,6 +10,8 @@ import logging
 import threading
 import glob
 import time
+from util import load2spectrogram
+from tfloader import TFLiteLoader
 
 # Setup pins
 pad_pin = board.D20
@@ -18,7 +20,7 @@ pixels = neopixel.NeoPixel(board.D21,30)
 pad.direction = Direction.INPUT
 # Status of device
 device_on = False
-testing_mode = True
+testing_mode = False
 # Motor vibration via PWM.
 # Mapping: r_1 => right glove, first finger is thumb l_1 => left hand, first finger is small finger
 r_1 = PWMOutputDevice(14)
@@ -37,6 +39,9 @@ pixels.fill((0,0,0))
 pixels.show()
 # Variable used to loop through the list of sound subfiles for prediction
 j = 0
+
+# Loading TF Lite model
+loader = TFLiteLoader(path="./saved_models/crazy_bird_encoder.h5")
 
 # This method plays a sound to the speakers
 def play_on_speaker(file):
@@ -60,20 +65,21 @@ def finishDemo(image_on_canvas, canvas):
     time.sleep(1)
 
 # This method feeds the subfiles to the model
-def predict():
+def predict(dataset):
     global j
     print('Infering from', list[j])
     i = 0
     motor_values = []
     if testing_mode:
-        while i < 5:
-            i += 1
-            motor_values.append(random.uniform(0.6,1))
-        print(motor_values)
+        motor_values = [random.uniform(0.6,1) for i in range(0,5)]
     else:
-        print("Model is predicting...")
+        if dataset[j] is not None:
+            motor_values = loader.predict(dataset[j])
+        else:
+            motor_values = [random.uniform(0,1) for i in range(0,5)]
+        
     j += 1
-    t = threading.Timer(0.1, predict)
+    t = threading.Timer(0.5, predict)
     t.start()
     if (j > len(list)-1):
         t.cancel()
@@ -132,9 +138,13 @@ while True:
                     list.append(name)
                 # Sort files by ascending number in name
                 list.sort(key = stringNumber)
+                dataset = []
+                for l in list:
+                    dataset.append(load2spectrogram(l))
+                    
                 # 5. Feed these files every 0.5 sec with timer to predictor
-                predict()
-                print("Continue")
+                #predict(dataset)
+                #print("Continue")
                 finishDemo(image_on_canvas, canvas)
                 root.update_idletasks()
                 root.update()
