@@ -1,6 +1,9 @@
 import glob
 
 import tensorflow as tf
+from tensorflow.python.client import device_lib
+print(f"Available: {[x.name for x in device_lib.list_local_devices()]}")
+
 import numpy as np
 import os
 
@@ -42,18 +45,20 @@ original_dim = x_train.shape[1]
 ENCODING_DIM = 5
 
 input = tf.keras.layers.Input(shape=(original_dim,))
-encoded = tf.keras.layers.Dense(ENCODING_DIM*100, activation='sigmoid')(input)
-encoded2 = tf.keras.layers.Dense(ENCODING_DIM*10, activation='sigmoid')(encoded)
-encoded3 = tf.keras.layers.Dense(ENCODING_DIM, activation='sigmoid')(encoded2)
+encoded = tf.keras.layers.Dense(ENCODING_DIM*100, activation='relu')(input)
+encoded2 = tf.keras.layers.Dense(ENCODING_DIM*10, activation='relu')(encoded)
+encoded3 = tf.keras.layers.Dense(ENCODING_DIM*5, activation='relu')(encoded2)
+encoded4 = tf.keras.layers.Dense(ENCODING_DIM, activation='relu', activity_regularizer=tf.keras.regularizers.l1(10e-5), name='encoder')(encoded3)
+decoded3 = tf.keras.layers.Dense(ENCODING_DIM*5, activation='relu')(encoded4)
+decoded2 = tf.keras.layers.Dense(ENCODING_DIM*10, activation='relu')(decoded3)
+decoded = tf.keras.layers.Dense(ENCODING_DIM*100, activation='relu')(decoded2)
+output = tf.keras.layers.Dense(original_dim, activation='linear')(decoded)
 
-decoded3 = tf.keras.layers.Dense(ENCODING_DIM*10, activation='sigmoid')(encoded3)
-decoded2 = tf.keras.layers.Dense(ENCODING_DIM*100, activation='sigmoid')(decoded3)
-decoded = tf.keras.layers.Dense(original_dim, activation='linear')(decoded2)
-
-autoencoder = tf.keras.models.Model(input, decoded)
-optimizer = tf.keras.optimizers.Adam(lr)
+autoencoder = tf.keras.models.Model(input, output)
+print(autoencoder.summary())
+optimizer = tf.keras.optimizers.RMSprop(lr=lr)
 autoencoder.compile(optimizer=optimizer, loss='mean_squared_error', metrics=['accuracy'])
-
+encoder = tf.keras.models.Model(inputs=autoencoder.input, outputs=autoencoder.get_layer('encoder').output)
 
 # now let's train this for 100 epochs (with added regularization, the model is less likely to overfit and can be trained
 # longer). The model ends with a train loss of 0.11 and test loss of 0.10. The difference is mostly due to
@@ -64,7 +69,8 @@ autoencoder.fit(x_train, x_train, epochs=5, batch_size=16, shuffle=True, validat
 # the reconstructed inputs and the encoded representations. We will be using Matplotlib
 # encode and decode some digits
 # note that we take them from the "test" set
-#encoded_audio = encoded3.predict(x_test)
+encoded_audio = encoder.predict(x_test)
+print(encoded_audio)
 decoded_audio = autoencoder.predict(x_test)
 
 # now using Matplotlib to plot the images
@@ -86,3 +92,6 @@ for i in range(n):
     ax.get_yaxis().set_visible(False)
 
 plt.show()
+
+autoencoder.save('./saved_models/crazy_bird.h5')
+
