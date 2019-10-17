@@ -5,7 +5,7 @@ from digitalio import DigitalInOut, Direction
 from gpiozero import PWMOutputDevice
 from tkinter import *
 from PIL import ImageTk, Image
-import os, random
+import os, sys,random
 import logging
 import threading
 import glob
@@ -48,8 +48,9 @@ def stringNumber(elem):
     return int(key)
 
 # This method finishes up the demo.
-def finishDemo():
-    black_screen =   Image.open("thanks.jpg")
+def finishDemo(image_on_canvas, canvas):
+    print("Finishing demo")
+    black_screen =  Image.open("thanks.jpg")
     img = ImageTk.PhotoImage(black_screen)              
     image_on_canvas = canvas.itemconfig(image_on_canvas,image = img)
                 
@@ -72,10 +73,12 @@ def predict():
     else:
         print("Model is predicting...")
     j += 1
+    t = threading.Timer(0.1, predict)
+    t.start()
     if (j > len(list)-1):
-        return
-    threading.Timer(0.5, predict).start()
-
+        t.cancel()
+        sys.exit()
+    
 while True:
         # 1. Load model
         # TODO: load model when script started
@@ -131,7 +134,8 @@ while True:
                 list.sort(key = stringNumber)
                 # 5. Feed these files every 0.5 sec with timer to predictor
                 predict()
-                finishDemo()
+                print("Continue")
+                finishDemo(image_on_canvas, canvas)
                 root.update_idletasks()
                 root.update()
                  # Sleep to avoid conflicts
