@@ -1,51 +1,29 @@
 import glob
 import os
 
-import librosa
 import numpy as np
-import scipy.signal
 from autoencoder import Autoencoder
 from scipy.io.wavfile import read
+
+from util import transform_audio, reshape_audio
+from config import DURATION, SAMPLE_RATE, WINDOW_SIZE, WINDOW_STRIDE, WINDOW
 
 # Import data
 path = "./wav"
 audios = [os.path.abspath(file) for file in glob.glob(f"{path}/*.wav")]
 
-SAMPLE_RATE = 16000
-DURATION = 8000
-WINDOW = scipy.signal.hamming
-WINDOW_SIZE = 0.02
-WINDOW_STRIDE = 0.01
-
-
-def transform_audio(sound: np.ndarray, sample_rate, window_size, window_stride, window):
-    n_fft = int(sample_rate * window_size)
-    win_length = n_fft
-    hop_length = int(sample_rate * window_stride)
-    D = librosa.stft(sound, n_fft=n_fft, hop_length=hop_length,
-                     win_length=win_length, window=window)
-    spectrogram, phase = librosa.magphase(D)
-
-    spectrogram = np.log1p(spectrogram)
-    mean = spectrogram.mean()
-    std = spectrogram.std()
-    spectrogram = spectrogram - mean
-    spectrogram = spectrogram / std
-
-    return spectrogram
-
 
 datapoints = []
 
 for audio in audios:
-    a = read(audio)
+    sr, a = read(audio)
     a = np.array(a[1], dtype=float)
     if a.shape[0] == DURATION:
-        datapoints.append(transform_audio(a, SAMPLE_RATE, WINDOW_SIZE, WINDOW_STRIDE, WINDOW))
+        datapoints.append(transform_audio(reshape_audio(a), SAMPLE_RATE, WINDOW_SIZE, WINDOW_STRIDE, WINDOW))
 
 x_train, x_test = datapoints[:-20], datapoints[-20:]
-x_train = np.array(x_train)
-x_test = np.array(x_test)
+x_train = np.array(x_train).transpose(1, 2).unsqueeze(1)
+x_test = np.array(x_test).transpose(1, 2).unsqueeze(1)
 
 print(f"Training size: {x_train.shape}")
 print(f"Val size: {x_test.shape}")
