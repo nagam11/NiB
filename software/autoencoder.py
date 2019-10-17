@@ -32,6 +32,7 @@ class Autoencoder(object):
         self._meansq = tf.reduce_mean(tf.square(self._output_layer - self._real_output))
         self._optimizer = tf.train.AdamOptimizer(learning_rate).minimize(self._meansq)
         self._training = tf.global_variables_initializer()
+        self._saver = tf.train.Saver()
         self._session = tf.Session()
 
     def train(self, input_train, input_test, batch_size, epochs):
@@ -45,13 +46,11 @@ class Autoencoder(object):
                                          feed_dict={self._input_layer: epoch_input, self._real_output: epoch_input})
                 epoch_loss += c
                 print('Epoch', epoch, '/', epochs, 'Batch loss:', c)
+            self._saver.save(self._session, f'./saved_models/model.ckpt')
             print('Epoch', epoch, '/', epochs, 'Epoch loss:', epoch_loss)
 
-    def getEncodedImage(self, image):
-        encoded_image = self._session.run(self._hidden_layer, feed_dict={self._input_layer: [image]})
-        return encoded_image
+    def getEncoded(self, audio):
+        encoded = self._session.run(self._hidden3_layer, feed_dict={self._input_layer: [audio]})
+        return encoded
 
-    def getDecodedImage(self, image):
-        decoded_image = self._session.run(self._output_layer, feed_dict={self._input_layer: [image]})
-        return decoded_image
 

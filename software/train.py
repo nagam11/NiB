@@ -8,7 +8,7 @@ from autoencoder import Autoencoder
 from scipy.io.wavfile import read
 
 # Import data
-path = "/Users/wagram/NiB/software/wav"
+path = "./wav"
 audios = [os.path.abspath(file) for file in glob.glob(f"{path}/*.wav")]
 
 SAMPLE_RATE = 16000
@@ -43,7 +43,7 @@ for audio in audios:
     if a.shape[0] == DURATION:
         datapoints.append(transform_audio(a, SAMPLE_RATE, WINDOW_SIZE, WINDOW_STRIDE, WINDOW))
 
-x_train, x_test = datapoints[:-200], datapoints[-200:]
+x_train, x_test = datapoints[:-20], datapoints[-20:]
 x_train = np.array(x_train)
 x_test = np.array(x_test)
 
@@ -57,10 +57,10 @@ x_train = x_train.reshape((len(x_train), np.prod(x_train.shape[1:])))
 x_test = x_test.reshape((len(x_test), np.prod(x_test.shape[1:])))
 
 # Tensorflow implementation
-autoencodertf = Autoencoder(x_train.shape[1], 10)
-autoencodertf.train(x_train, x_test, 16, 500)
-encoded_img = autoencodertf.getEncodedImage(x_test[1])
-decoded_img = autoencodertf.getDecodedImage(x_test[1])
+autoencodertf = Autoencoder(x_train.shape[1], 5)
+autoencodertf.train(x_train, x_test, 16, 1000)
+encoded_img = autoencodertf.getEncoded(x_test[1])
+decoded_img = autoencodertf.getDecoded(x_test[1])
 
 # Tensorflow implementation results
 print(x_test[1])
