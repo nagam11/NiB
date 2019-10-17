@@ -56,7 +56,7 @@ while True:
                 pixels.fill((255,0,0))
                 pixels.show()
                 # Start sound demo
-                # TODO
+                # 
                 root = Tk()                
                 # canvas for image
                 canvas = Canvas(root, width=1850, height=890, bg = 'black')
