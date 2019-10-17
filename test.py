@@ -8,7 +8,7 @@ from sklearn.model_selection import train_test_split
 
 from config import SAMPLE_RATE, WINDOW_SIZE, WINDOW_STRIDE, WINDOW, DURATION
 from loader import Loader
-from util import transform_audio
+from util import transform_audio, plot_results
 
 path = "./wav"
 audios = [os.path.abspath(file) for file in glob.glob(f"{path}/*.wav")]
@@ -31,7 +31,13 @@ dataset = dataset.reshape((len(dataset), np.prod(dataset.shape[1:])))
 
 loader = Loader(path="./saved_models/crazy_bird.h5")
 
+loader.get_encoder().save('./saved_models/crazy_bird_encoder.h5')
+
 encoded_dataset = loader.encode(dataset)
 
 print(f"Maximum value: {np.max(encoded_dataset)}")
 print(f"Minimum value: {np.min(encoded_dataset)}")
+print(encoded_dataset)
+
+decoded_audio = loader.predict(dataset)
+plot_results(test=dataset, decoded=decoded_audio, n=12)

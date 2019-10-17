@@ -73,25 +73,7 @@ encoded_audio = encoder.predict(x_test)
 print(encoded_audio)
 decoded_audio = autoencoder.predict(x_test)
 
-# now using Matplotlib to plot the images
-n = 10  # how many images we will display
-plt.figure(figsize=(20, 4))
-for i in range(n):
-    # display original
-    ax = plt.subplot(2, n, i + 1)
-    plt.imshow(x_test[i].reshape(161, 51))
-    plt.gray()
-    ax.get_xaxis().set_visible(False)
-    ax.get_yaxis().set_visible(False)
-
-    # display reconstruction
-    ax = plt.subplot(2, n, i + 1 + n)
-    plt.imshow(decoded_audio[i].reshape(161, 51))
-    plt.gray()
-    ax.get_xaxis().set_visible(False)
-    ax.get_yaxis().set_visible(False)
-
-plt.show()
+plot_results(test=x_test, decoded=decoded_audio, n=12)
 
 autoencoder.save('./saved_models/crazy_bird.h5')
 
