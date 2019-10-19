@@ -16,7 +16,7 @@ from config import DURATION, SAMPLE_RATE, WINDOW_SIZE, WINDOW_STRIDE, WINDOW
 lr = 0.001
 
 # Import data
-path = "./wav"
+path = "./wav_x"
 audios = [os.path.abspath(file) for file in glob.glob(f"{path}/*.wav")]
 
 datapoints = []
@@ -24,11 +24,13 @@ datapoints = []
 for audio in audios:
     sr, a = read(audio)
     a = np.array(a, dtype=float)
-    if a.shape[0] == DURATION:
-        datapoints.append(transform_audio(a, SAMPLE_RATE, WINDOW_SIZE, WINDOW_STRIDE, WINDOW))
+    if a.shape[0] != DURATION:
+        a = np.pad(a, (0, DURATION - a.shape[0]), 'constant')
+    datapoints.append(transform_audio(a, SAMPLE_RATE, WINDOW_SIZE, WINDOW_STRIDE, WINDOW))
 
 # x_train, x_test = datapoints[:-20], datapoints[-20:]
-x_train, x_test = train_test_split(datapoints, test_size=0.05, random_state=42)
+print(f"Dataset size: {len(datapoints)} samples")
+x_train, x_test = train_test_split(datapoints, test_size=0.1, random_state=42)
 x_train = np.array(x_train)
 x_test = np.array(x_test)
 
@@ -39,7 +41,6 @@ x_train = x_train.reshape((len(x_train), np.prod(x_train.shape[1:])))
 x_test = x_test.reshape((len(x_test), np.prod(x_test.shape[1:])))
 original_dim = x_train.shape[1]
 
-# we will start simple with a single fully-connected neural layer as encoder and decoder
 # this is the siez of our encoded representations
 ENCODING_DIM = 5
 
@@ -55,24 +56,19 @@ output = tf.keras.layers.Dense(original_dim, activation='linear')(decoded)
 
 autoencoder = tf.keras.models.Model(input, output)
 print(autoencoder.summary())
-optimizer = tf.keras.optimizers.RMSprop(lr=lr)
+optimizer = tf.keras.optimizers.Adam(lr=lr)
 autoencoder.compile(optimizer=optimizer, loss='mean_squared_error', metrics=['accuracy'])
 encoder = tf.keras.models.Model(inputs=autoencoder.input, outputs=autoencoder.get_layer('encoder').output)
 
-# now let's train this for 100 epochs (with added regularization, the model is less likely to overfit and can be trained
-# longer). The model ends with a train loss of 0.11 and test loss of 0.10. The difference is mostly due to
+# with added regularization, the model is less likely to overfit and can be trained
+# longer. The model ends with a train loss of 0.11 and test loss of 0.10. The difference is mostly due to
 # the regularization term being added to the loss during training
-autoencoder.fit(x_train, x_train, epochs=500, batch_size=16, shuffle=True, validation_data=(x_test, x_test))
+autoencoder.fit(x_train, x_train, epochs=5000, batch_size=64, shuffle=True, validation_data=(x_test, x_test))
 
-# after 50 epochs the autoencoder seems to reach a stable train/test loss value of about 0.11. We can try to visualize
-# the reconstructed inputs and the encoded representations. We will be using Matplotlib
-# encode and decode some digits
-# note that we take them from the "test" set
 encoded_audio = encoder.predict(x_test)
 print(encoded_audio)
-decoded_audio = autoencoder.predict(x_test)
+decoded_audio = autoencoder.predict(x_train)
 
-plot_results(test=x_test, decoded=decoded_audio, n=12)
+plot_results(test=x_train, decoded=decoded_audio, n=12)
 
-autoencoder.save('./saved_models/crazy_bird.h5')
-
+autoencoder.save('./saved_models/crazy_bird_5000.h5')
