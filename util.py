@@ -29,11 +29,11 @@ def transform_audio(sound: np.ndarray, sample_rate, window_size, window_stride, 
 def load2spectrogram(path: str):
     sr, a = read(path)
     a = np.array(a, dtype=float)
-    if a.shape[0] == DURATION:
-        datapoint = transform_audio(a, SAMPLE_RATE, WINDOW_SIZE, WINDOW_STRIDE, WINDOW)
-        datapoint = np.reshape(datapoint, (np.product(datapoint.shape),))
-        return datapoint
-    return None
+    if a.shape[0] != DURATION:
+        a = np.pad(a, (0, DURATION - a.shape[0]), 'constant')
+    datapoint = transform_audio(a, SAMPLE_RATE, WINDOW_SIZE, WINDOW_STRIDE, WINDOW)
+    datapoint = np.reshape(datapoint, (np.product(datapoint.shape),))
+    return datapoint
 
 
 def plot_results(test, decoded, n=10):
