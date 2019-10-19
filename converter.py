@@ -9,10 +9,10 @@ from config import SAMPLE_RATE, WINDOW_SIZE, WINDOW_STRIDE, WINDOW, DURATION
 from loader import Loader
 
 # Load the tf.keras model.
-from util import transform_audio, load2spectrogram
+from util import transform_audio
 
 # Convert the model.
-converter = tf.lite.TFLiteConverter.from_keras_model_file("./saved_models/crazy_bird_encoder.h5")
+converter = tf.lite.TFLiteConverter.from_keras_model_file("./saved_models/crazy_bird_encoder_5000.h5")
 tflite_encoder = converter.convert()
 
 # Load TFLite model and allocate tensors.
@@ -35,8 +35,9 @@ datapoints = []
 for audio in audios:
     sr, a = read(audio)
     a = np.array(a, dtype=float)
-    if a.shape[0] == DURATION:
-        datapoints.append(transform_audio(a, SAMPLE_RATE, WINDOW_SIZE, WINDOW_STRIDE, WINDOW))
+    if a.shape[0] != DURATION:
+        a = np.pad(a, (0, DURATION - a.shape[0]), 'constant')
+    datapoints.append(transform_audio(a, SAMPLE_RATE, WINDOW_SIZE, WINDOW_STRIDE, WINDOW))
 
 # x_train, x_test = datapoints[:-20], datapoints[-20:]
 dataset = datapoints
@@ -51,7 +52,7 @@ interpreter.invoke()
 tflite_results = interpreter.get_tensor(output_details[0]['index'])
 
 # Test the TensorFlow model on random input data.
-loader = Loader(path="./saved_models/crazy_bird.h5")
+loader = Loader(path="./saved_models/crazy_bird_5000.h5")
 tf_results = loader.encode(dataset[[0], :])
 
 # Compare the result.

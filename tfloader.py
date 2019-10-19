@@ -2,6 +2,9 @@ import tflite_runtime.interpreter as tflite
 
 
 class TFLiteLoader:
+    """
+    Loader for a tensorflow lite model
+    """
     def __init__(self, path: str):
         # Load TFLite model and allocate tensors.
         self.interpreter = tflite.Interpreter(model_path=path)

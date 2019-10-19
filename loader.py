@@ -2,7 +2,9 @@ import tensorflow as tf
 
 
 class Loader:
-
+    """
+    Loader for a keras model
+    """
     def __init__(self, path: str):
         self.model = tf.keras.models.load_model(path)
         self.encoder = tf.keras.models.Model(inputs=self.model.input, outputs=self.model.get_layer('encoder').output)
