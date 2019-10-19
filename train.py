@@ -71,4 +71,4 @@ decoded_audio = autoencoder.predict(x_train)
 
 plot_results(test=x_train, decoded=decoded_audio, n=12)
 
-autoencoder.save('./saved_models/crazy_bird_5000.h5')
+autoencoder.save('./saved_models/crazy_bird_max.h5')

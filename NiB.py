@@ -42,7 +42,7 @@ pixels.show()
 j = 0
 
 # Loading TF Lite model
-loader = TFLiteLoader(path="./saved_models/crazy_bird_encoder_5000.tflite")
+loader = TFLiteLoader(path="./saved_models/crazy_bird_encoder_max.tflite")
 # Maxima for each latent dimension
 MX_VAL = np.array([25.497225, 37.466076, 17.507608, 37.70733, 32.484062])
 

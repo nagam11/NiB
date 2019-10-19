@@ -28,9 +28,9 @@ print(f"Dataset size: {dataset.shape}")
 
 dataset = dataset.reshape((len(dataset), np.prod(dataset.shape[1:])))
 
-loader = Loader(path="./saved_models/crazy_bird_5000.h5")
+loader = Loader(path="./saved_models/crazy_bird_max.h5")
 
-loader.get_encoder().save('./saved_models/crazy_bird_encoder_5000.h5')
+loader.get_encoder().save('./saved_models/crazy_bird_encoder_max.h5')
 
 encoded_dataset = loader.encode(dataset)
 

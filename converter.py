@@ -12,7 +12,7 @@ from loader import Loader
 from util import transform_audio
 
 # Convert the model.
-converter = tf.lite.TFLiteConverter.from_keras_model_file("./saved_models/crazy_bird_encoder_5000.h5")
+converter = tf.lite.TFLiteConverter.from_keras_model_file("./saved_models/crazy_bird_encoder_max.h5")
 tflite_encoder = converter.convert()
 
 # Load TFLite model and allocate tensors.
@@ -52,7 +52,7 @@ interpreter.invoke()
 tflite_results = interpreter.get_tensor(output_details[0]['index'])
 
 # Test the TensorFlow model on random input data.
-loader = Loader(path="./saved_models/crazy_bird_5000.h5")
+loader = Loader(path="./saved_models/crazy_bird_max.h5")
 tf_results = loader.encode(dataset[[0], :])
 
 # Compare the result.
