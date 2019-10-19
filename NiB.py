@@ -12,6 +12,7 @@ import glob
 import time
 from util import load2spectrogram
 from tfloader import TFLiteLoader
+import numpy as np
 
 # Setup pins
 pad_pin = board.D20
@@ -41,7 +42,9 @@ pixels.show()
 j = 0
 
 # Loading TF Lite model
-loader = TFLiteLoader(path="./saved_models/crazy_bird_encoder.h5")
+loader = TFLiteLoader(path="./saved_models/crazy_bird_encoder_5000.tflite")
+# Maxima for each latent dimension
+MX_VAL = np.array([25.497225, 37.466076, 17.507608, 37.70733, 32.484062])
 
 # This method plays a sound to the speakers
 def play_on_speaker(file):
@@ -71,12 +74,9 @@ def predict(dataset):
     i = 0
     motor_values = []
     if testing_mode:
-        motor_values = [random.uniform(0.6,1) for i in range(0,5)]
+        motor_values = [random.uniform(0.6, 1) for i in range(0, 5)]
     else:
-        if dataset[j] is not None:
-            motor_values = loader.predict(dataset[j])
-        else:
-            motor_values = [random.uniform(0,1) for i in range(0,5)]
+        motor_values = loader.predict(dataset[[j], :]) / MX_VAL
         
     j += 1
     t = threading.Timer(0.5, predict)
@@ -141,6 +141,7 @@ while True:
                 dataset = []
                 for l in list:
                     dataset.append(load2spectrogram(l))
+                dataset = np.array(dataset)
                     
                 # 5. Feed these files every 0.5 sec with timer to predictor
                 #predict(dataset)
