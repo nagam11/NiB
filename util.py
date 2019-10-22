@@ -1,4 +1,5 @@
 import os
+import random
 
 import librosa
 import numpy as np
@@ -36,21 +37,25 @@ def load2spectrogram(path: str):
     return datapoint
 
 
-# def plot_results(test, decoded, n=10):
-#     plt.figure(figsize=(20, 4))
-#     for i in range(n):
-#         # display original
-#         ax = plt.subplot(2, n, i + 1)
-#         plt.imshow(test[i].reshape(161, 51))
-#         plt.gray()
-#         ax.get_xaxis().set_visible(False)
-#         ax.get_yaxis().set_visible(False)
-# 
-#         # display reconstruction
-#         ax = plt.subplot(2, n, i + 1 + n)
-#         plt.imshow(decoded[i].reshape(161, 51))
-#         plt.gray()
-#         ax.get_xaxis().set_visible(False)
-#         ax.get_yaxis().set_visible(False)
-# 
-#     plt.show()
+def plot_results(test, decoded, n=10, indices=None):
+    plt.figure(figsize=(20, 4))
+    if indices is None:
+        indices = [random.randint(0, len(test) - 1) for x in range(n)]
+    elif len(indices) != n:
+        raise ValueError("The number of indices does not equal the number of plots")
+    for i in range(n):
+        # display original
+        ax = plt.subplot(2, n, i + 1)
+        plt.imshow(test[indices[i]].reshape(161, 51))
+        plt.gray()
+        ax.get_xaxis().set_visible(False)
+        ax.get_yaxis().set_visible(False)
+
+        # display reconstruction
+        ax = plt.subplot(2, n, i + 1 + n)
+        plt.imshow(decoded[indices[i]].reshape(161, 51))
+        plt.gray()
+        ax.get_xaxis().set_visible(False)
+        ax.get_yaxis().set_visible(False)
+
+    plt.show()
