@@ -29,11 +29,16 @@ r_2 = PWMOutputDevice(15)
 r_3 = PWMOutputDevice(18)
 r_4 = PWMOutputDevice(2)
 r_5 = PWMOutputDevice(3)
-l_1 = PWMOutputDevice(4)
-l_2 = PWMOutputDevice(17)
+l_1 = PWMOutputDevice(10)
+l_2 = PWMOutputDevice(22)
 l_3 = PWMOutputDevice(27)
-l_4 = PWMOutputDevice(22)
-l_5 = PWMOutputDevice(10)
+l_4 = PWMOutputDevice(17)
+l_5 = PWMOutputDevice(4)
+# l_1 = PWMOutputDevice(4)
+# l_2 = PWMOutputDevice(17)
+# l_3 = PWMOutputDevice(27)
+# l_4 = PWMOutputDevice(22)
+# l_5 = PWMOutputDevice(10)
 motors = [r_1, r_2, r_3, r_4, r_5, l_1, l_2, l_3, l_4, l_5]
 # Turn off Neopixels on restart
 pixels.fill((0,0,0))
@@ -76,10 +81,17 @@ def predict(dataset):
     if testing_mode:
         motor_values = [random.uniform(0.6, 1) for i in range(0, 5)]
     else:
+        print('predicting')
         motor_values = loader.predict(dataset[[j], :]) / MX_VAL
+        motor_values = np.clip(motor_values * 2, 0, 1)
+        #motor_values = loader.predict(dataset[[j], :]) / 22.85 
+        print(motor_values)
+        for i in range(len(motor_values[0])):
+            motors[i].value = motor_values[0][i]
+            motors[i+5].value = motor_values[0][i]
         
     j += 1
-    t = threading.Timer(0.5, predict)
+    t = threading.Timer(0.5, predict, args = (dataset,))
     t.start()
     if (j > len(list)-1):
         t.cancel()
@@ -144,7 +156,7 @@ while True:
                 dataset = np.array(dataset)
                     
                 # 5. Feed these files every 0.5 sec with timer to predictor
-                #predict(dataset)
+                predict(dataset)
                 #print("Continue")
                 finishDemo(image_on_canvas, canvas)
                 root.update_idletasks()

@@ -3,8 +3,8 @@ import random
 
 import librosa
 import numpy as np
-import tensorflow as tf
-import matplotlib.pyplot as plt
+#import tensorflow as tf
+#import matplotlib.pyplot as plt
 from scipy.io.wavfile import read
 
 from config import DURATION, SAMPLE_RATE, WINDOW_SIZE, WINDOW_STRIDE, WINDOW
