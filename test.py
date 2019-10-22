@@ -46,8 +46,11 @@ print(f"Minimum value: {np.min(norm, axis=0)}")
 print(f"Mean: {norm.mean(axis=0)}")
 print(f"Std: {norm.std(axis=0)}")
 print(norm)
-
+print("===================================")
 
 decoded_audio = loader.predict(dataset)
-plot_results(test=dataset, decoded=decoded_audio, n=12)
+indices = np.random.randint(len(dataset) - 1, size=12)
+print(f"Maxes:\n{encoded_dataset[indices, :]}")
+print(f"Norms:\n{norm[indices, :]}")
+plot_results(test=dataset, decoded=decoded_audio, n=12, indices=indices)
 
