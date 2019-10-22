@@ -29,11 +29,16 @@ r_2 = PWMOutputDevice(15)
 r_3 = PWMOutputDevice(18)
 r_4 = PWMOutputDevice(2)
 r_5 = PWMOutputDevice(3)
-l_1 = PWMOutputDevice(4)
-l_2 = PWMOutputDevice(17)
+l_1 = PWMOutputDevice(10)
+l_2 = PWMOutputDevice(22)
 l_3 = PWMOutputDevice(27)
-l_4 = PWMOutputDevice(22)
-l_5 = PWMOutputDevice(10)
+l_4 = PWMOutputDevice(17)
+l_5 = PWMOutputDevice(4)
+# l_1 = PWMOutputDevice(4)
+# l_2 = PWMOutputDevice(17)
+# l_3 = PWMOutputDevice(27)
+# l_4 = PWMOutputDevice(22)
+# l_5 = PWMOutputDevice(10)
 motors = [r_1, r_2, r_3, r_4, r_5, l_1, l_2, l_3, l_4, l_5]
 # Turn off Neopixels on restart
 pixels.fill((0,0,0))
@@ -78,6 +83,7 @@ def predict(dataset):
     else:
         print('predicting')
         motor_values = loader.predict(dataset[[j], :]) / MX_VAL
+        motor_values = np.clip(motor_values * 2, 0, 1)
         #motor_values = loader.predict(dataset[[j], :]) / 22.85 
         print(motor_values)
         for i in range(len(motor_values[0])):
