@@ -76,10 +76,16 @@ def predict(dataset):
     if testing_mode:
         motor_values = [random.uniform(0.6, 1) for i in range(0, 5)]
     else:
+        print('predicting')
         motor_values = loader.predict(dataset[[j], :]) / MX_VAL
+        #motor_values = loader.predict(dataset[[j], :]) / 22.85 
+        print(motor_values)
+        for i in range(len(motor_values[0])):
+            motors[i].value = motor_values[0][i]
+            motors[i+5].value = motor_values[0][i]
         
     j += 1
-    t = threading.Timer(0.5, predict)
+    t = threading.Timer(0.5, predict, args = (dataset,))
     t.start()
     if (j > len(list)-1):
         t.cancel()
@@ -144,7 +150,7 @@ while True:
                 dataset = np.array(dataset)
                     
                 # 5. Feed these files every 0.5 sec with timer to predictor
-                #predict(dataset)
+                predict(dataset)
                 #print("Continue")
                 finishDemo(image_on_canvas, canvas)
                 root.update_idletasks()
