@@ -1,6 +1,6 @@
 # Nature in a Box (NiB): enabling people with hearing loss to sense nature through machine learning
 
-<img src="./NiB_device.png" height="370">
+<img src="Information/NiB_device.png" height="370">
 
 The notion of invisibility differs from person to person. This concept gains a particular meaning for people with restricted sensory capabilities, such as color-blind, blind or individuals experiencing hearing loss. In this work, we focus on a Machine Learning (ML)-based solution to enable people with hearing loss to sense nature through a portable actuated cardboard device. The device captures different nature sounds, such as bird sounds and classifies these into categories. This information is then used to generate specific vibration patterns of the box. The users are presented with additional information such as pictures of the recognized birds and information about the species. In this way, we bring the feeling of relaxation in nature closer to people experiencing hearing loss.
 
