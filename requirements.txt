@@ -1,6 +1,6 @@
 librosa
 matplotlib
-tensorflow-gpu==1.15.2
+tensorflow-gpu==2.5.3
 h5py
 numpy
 scipy
